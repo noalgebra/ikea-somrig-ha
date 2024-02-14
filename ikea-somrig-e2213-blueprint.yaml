@@ -65,7 +65,7 @@ action:
       args: "{{ trigger.event.data.args }}"
   - choose:
       - conditions:
-          - "{{ command == ''short_release'' }}"
+          - "{{ command == 'short_release' }}"
           - "{{ endpoint_id == 1 }}"
         sequence:
           - choose:
@@ -82,7 +82,7 @@ action:
                 data:
                   transition: 1
       - conditions:
-          - "{{ command == ''short_release'' }}"
+          - "{{ command == 'short_release' }}"
           - "{{ endpoint_id == 2 }}"
         sequence:
           - service: light.turn_off
@@ -90,7 +90,7 @@ action:
             data:
               transition: 1
       - conditions:
-          - "{{ command == ''long_press'' }}"
+          - "{{ command == 'long_press' }}"
           - "{{ endpoint_id == 1 }}"
         sequence:
           - repeat:
@@ -103,7 +103,7 @@ action:
                     transition: !input "hold_time"
                 - delay: !input "hold_time"
       - conditions:
-          - "{{ command == ''long_press'' }}"
+          - "{{ command == 'long_press' }}"
           - "{{ endpoint_id == 2 }}"
         sequence:
           - repeat:
