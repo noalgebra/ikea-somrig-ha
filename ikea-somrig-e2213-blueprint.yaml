@@ -66,6 +66,7 @@ action:
   - choose:
       - conditions:
           - "{{ command == 'short_release' }}"
+          - "{{ cluster_id == 6 }}"
           - "{{ endpoint_id == 1 }}"
         sequence:
           - choose:
@@ -83,6 +84,7 @@ action:
                   transition: 1
       - conditions:
           - "{{ command == 'short_release' }}"
+          - "{{ cluster_id == 6 }}"
           - "{{ endpoint_id == 2 }}"
         sequence:
           - service: light.turn_off
@@ -91,6 +93,7 @@ action:
               transition: 1
       - conditions:
           - "{{ command == 'long_press' }}"
+          - "{{ cluster_id == 8 }}"
           - "{{ endpoint_id == 1 }}"
         sequence:
           - repeat:
@@ -104,6 +107,7 @@ action:
                 - delay: !input "hold_time"
       - conditions:
           - "{{ command == 'long_press' }}"
+          - "{{ cluster_id == 8 }}"
           - "{{ endpoint_id == 2 }}"
         sequence:
           - repeat:
