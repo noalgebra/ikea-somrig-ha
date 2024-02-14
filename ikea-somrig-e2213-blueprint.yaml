@@ -65,8 +65,7 @@ action:
       args: "{{ trigger.event.data.args }}"
   - choose:
       - conditions:
-          - "{{ command == 'on' }}"
-          - "{{ cluster_id == 6 }}"
+          - "{{ command == ''short_release'' }}"
           - "{{ endpoint_id == 1 }}"
         sequence:
           - choose:
@@ -83,17 +82,15 @@ action:
                 data:
                   transition: 1
       - conditions:
-          - "{{ command == 'off' }}"
-          - "{{ cluster_id == 6 }}"
-          - "{{ endpoint_id == 1 }}"
+          - "{{ command == ''short_release'' }}"
+          - "{{ endpoint_id == 2 }}"
         sequence:
           - service: light.turn_off
             target: !input "light"
             data:
               transition: 1
       - conditions:
-          - "{{ command == 'move_with_on_off' }}"
-          - "{{ cluster_id == 8 }}"
+          - "{{ command == ''long_press'' }}"
           - "{{ endpoint_id == 1 }}"
         sequence:
           - repeat:
@@ -106,9 +103,8 @@ action:
                     transition: !input "hold_time"
                 - delay: !input "hold_time"
       - conditions:
-          - "{{ command == 'move' }}"
-          - "{{ cluster_id == 8 }}"
-          - "{{ endpoint_id == 1 }}"
+          - "{{ command == ''long_press'' }}"
+          - "{{ endpoint_id == 2 }}"
         sequence:
           - repeat:
               count: 10
