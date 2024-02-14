@@ -1,0 +1,121 @@
+blueprint:
+  name: ZHA - IKEA Somrig remote for lights
+  description: Dimmable light control
+  domain: automation
+  input:
+    remote:
+      name: Remote
+      description: IKEA Somrig remote to use
+      selector:
+        device:
+          integration: zha
+          manufacturer: IKEA of Sweden
+          model: SOMRIG shortcut button
+          multiple: false
+    light:
+      name: Light(s)
+      description: The light(s) to control
+      selector:
+        target:
+          entity:
+            domain: light
+    force_brightness:
+      name: Force turn on brightness
+      description:
+        Force the brightness to the set level below, when the "on" button
+        on the remote is pushed and lights turn on.
+      default: false
+      selector:
+        boolean: null
+    brightness:
+      name: Brightness
+      description: Brightness of the light(s) when turning on
+      default: 50
+      selector:
+        number:
+          min: 0.0
+          max: 100.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: "%"
+    hold_time:
+      name: Hold Time
+      description: Time between the execution of the brighter/darker actions when holding the brighter/darker button.
+      default: 0.5
+      selector:
+        number:
+          min: 0.1
+          max: 2
+          step: 0.1
+          unit_of_measurement: seconds
+mode: restart
+max_exceeded: silent
+variables:
+  force_brightness: !input "force_brightness"
+trigger:
+  - platform: event
+    event_type: zha_event
+    event_data:
+      device_id: !input "remote"
+action:
+  - variables:
+      command: "{{ trigger.event.data.command }}"
+      cluster_id: "{{ trigger.event.data.cluster_id }}"
+      endpoint_id: "{{ trigger.event.data.endpoint_id }}"
+      args: "{{ trigger.event.data.args }}"
+  - choose:
+      - conditions:
+          - "{{ command == 'on' }}"
+          - "{{ cluster_id == 6 }}"
+          - "{{ endpoint_id == 1 }}"
+        sequence:
+          - choose:
+              - conditions: "{{ force_brightness }}"
+                sequence:
+                  - service: light.turn_on
+                    target: !input "light"
+                    data:
+                      transition: 1
+                      brightness_pct: !input "brightness"
+            default:
+              - service: light.turn_on
+                target: !input "light"
+                data:
+                  transition: 1
+      - conditions:
+          - "{{ command == 'off' }}"
+          - "{{ cluster_id == 6 }}"
+          - "{{ endpoint_id == 1 }}"
+        sequence:
+          - service: light.turn_off
+            target: !input "light"
+            data:
+              transition: 1
+      - conditions:
+          - "{{ command == 'move_with_on_off' }}"
+          - "{{ cluster_id == 8 }}"
+          - "{{ endpoint_id == 1 }}"
+        sequence:
+          - repeat:
+              count: 10
+              sequence:
+                - service: light.turn_on
+                  target: !input "light"
+                  data:
+                    brightness_step_pct: 10
+                    transition: !input "hold_time"
+                - delay: !input "hold_time"
+      - conditions:
+          - "{{ command == 'move' }}"
+          - "{{ cluster_id == 8 }}"
+          - "{{ endpoint_id == 1 }}"
+        sequence:
+          - repeat:
+              count: 10
+              sequence:
+                - service: light.turn_on
+                  target: !input "light"
+                  data:
+                    brightness_step_pct: -10
+                    transition: !input "hold_time"
+                - delay: !input "hold_time"
